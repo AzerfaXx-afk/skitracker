@@ -1,7 +1,7 @@
 [build]
   base = "Downloads/ski-tracker"
   command = "npm run build"
-  publish = "Downloads/ski-tracker/dist"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"

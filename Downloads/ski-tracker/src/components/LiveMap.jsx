@@ -1,5 +1,7 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Polyline, CircleMarker, useMap } from 'react-leaflet';
+import { Crosshair } from 'lucide-react';
+import { motion } from 'framer-motion';
 import 'leaflet/dist/leaflet.css';
 
 const DEFAULT_CENTER = [45.8326, 6.8652];
@@ -20,40 +22,71 @@ function MapFollower({ center, follow }) {
     }, [center, follow, map]);
 
     useEffect(() => {
-        const timer = setTimeout(() => map.invalidateSize(), 300);
+        const timer = setTimeout(() => map.invalidateSize(), 200);
         return () => clearTimeout(timer);
     }, [map]);
 
     return null;
 }
 
-/* ── Recenter button (used by MapScreen) ── */
-function RecenterButton({ map, target }) {
-    if (!target) return null;
-    return (
-        <button
-            onClick={() => map.setView(target, 16, { animate: true, duration: 0.6 })}
-            style={{
-                position: 'absolute', bottom: 90, right: 16, zIndex: 30,
-                width: 48, height: 48, borderRadius: 16,
-                background: 'rgba(2,6,23,0.8)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                border: '1px solid rgba(34,211,238,0.2)',
-                boxShadow: '0 0 20px rgba(34,211,238,0.1)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: '#22d3ee',
-                fontSize: 22,
-            }}>
-            📍
-        </button>
-    );
-}
-
-/* ── RecenterControl (inside MapContainer) ── */
+/* ── Glass Recenter Button ── */
 function RecenterControl({ target }) {
     const map = useMap();
-    return <RecenterButton map={map} target={target} />;
+    const [isRecentered, setIsRecentered] = useState(true);
+
+    useEffect(() => {
+        const onMove = () => {
+            if (!target) return;
+            const mapCenter = map.getCenter();
+            const dist = mapCenter.distanceTo({ lat: target[0], lng: target[1] });
+            setIsRecentered(dist < 50);
+        };
+        map.on('moveend', onMove);
+        return () => map.off('moveend', onMove);
+    }, [map, target]);
+
+    if (!target) return null;
+
+    return (
+        <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{
+                opacity: isRecentered ? 0.4 : 1,
+                scale: isRecentered ? 0.9 : 1,
+            }}
+            whileTap={{ scale: 0.85 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            onClick={(e) => {
+                e.stopPropagation();
+                map.setView(target, 16, { animate: true, duration: 0.5 });
+            }}
+            style={{
+                position: 'absolute', bottom: 90, right: 14, zIndex: 1000,
+                width: 46, height: 46, borderRadius: 15,
+                background: 'rgba(2, 6, 23, 0.75)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                border: isRecentered
+                    ? '1px solid rgba(255,255,255,0.06)'
+                    : '1px solid rgba(34,211,238,0.25)',
+                boxShadow: isRecentered
+                    ? 'none'
+                    : '0 0 20px rgba(34,211,238,0.12), inset 0 1px 0 rgba(255,255,255,0.05)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', padding: 0,
+            }}
+        >
+            <Crosshair
+                size={20}
+                color={isRecentered ? '#475569' : '#22d3ee'}
+                strokeWidth={2}
+                style={{
+                    filter: isRecentered ? 'none' : 'drop-shadow(0 0 6px rgba(34,211,238,0.4))',
+                    transition: 'color 0.3s, filter 0.3s',
+                }}
+            />
+        </motion.button>
+    );
 }
 
 export default function LiveMap({ coordinates = [], userPosition, interactive = true }) {
@@ -80,12 +113,20 @@ export default function LiveMap({ coordinates = [], userPosition, interactive = 
                 touchZoom={interactive}
                 doubleClickZoom={interactive}
                 zoomSnap={0.5}
+                zoomAnimation={true}
+                fadeAnimation={true}
+                markerZoomAnimation={true}
             >
                 <TileLayer
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                     subdomains="abcd"
                     maxZoom={20}
+                    keepBuffer={6}
+                    updateWhenZooming={false}
+                    updateWhenIdle={true}
+                    loading="lazy"
                 />
+
                 {coordinates.length > 1 && <Polyline positions={coordinates} pathOptions={glowOptions} />}
                 {coordinates.length > 1 && <Polyline positions={coordinates} pathOptions={trailOptions} />}
 

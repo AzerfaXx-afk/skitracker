@@ -134,6 +134,24 @@ function App() {
         setIsTracking(false);
     }, [releaseWake, distance, negativeElevation, elapsedSeconds, coordinates, sessions]);
 
+    // Delete a single session by ID
+    const deleteSession = useCallback((sessionId) => {
+        const updated = sessions.filter(s => s.id !== sessionId);
+        setSessions(updated);
+        localStorage.setItem('ski_sessions', JSON.stringify(updated));
+    }, [sessions]);
+
+    // Delete all sessions for a given day key
+    const deleteDaySessions = useCallback((dayKey) => {
+        const updated = sessions.filter(s => {
+            const d = new Date(s.id);
+            const key = d.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+            return key !== dayKey;
+        });
+        setSessions(updated);
+        localStorage.setItem('ski_sessions', JSON.stringify(updated));
+    }, [sessions]);
+
     useEffect(() => () => {
         if (watchIdRef.current != null) navigator.geolocation.clearWatch(watchIdRef.current);
         if (timerRef.current) clearInterval(timerRef.current);
@@ -146,6 +164,7 @@ function App() {
         isTracking, currentSpeed, maxSpeed, distance, altitude, negativeElevation,
         coordinates, elapsedSeconds, gpsStatus, newRecord, sessions, userPosition,
         onStart: startTracking, onStop: stopTracking,
+        deleteSession, deleteDaySessions,
     };
 
     return (

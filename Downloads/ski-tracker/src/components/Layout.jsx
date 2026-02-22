@@ -1,16 +1,17 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Zap, Map, Trophy } from 'lucide-react';
 import { useTracking } from '../App';
 
-const NAV_ITEMS = [
-    { to: '/', label: 'Live', emoji: '⚡' },
-    { to: '/map', label: 'Map', emoji: '🗺️' },
-    { to: '/history', label: 'History', emoji: '🏆' },
+const tabs = [
+    { to: '/', label: 'Live', Icon: Zap },
+    { to: '/map', label: 'Map', Icon: Map },
+    { to: '/history', label: 'History', Icon: Trophy },
 ];
 
 export default function Layout() {
-    const { isTracking } = useTracking();
     const location = useLocation();
+    const { isTracking } = useTracking();
 
     return (
         <div style={{
@@ -19,74 +20,108 @@ export default function Layout() {
             background: '#020617',
             position: 'relative', overflow: 'hidden',
         }}>
-            {/* Page content */}
+            {/* Page Content */}
             <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
                 <Outlet />
             </div>
 
-            {/* Bottom Nav */}
-            <nav style={{
-                flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-around',
-                background: 'rgba(2, 6, 23, 0.85)',
-                backdropFilter: 'blur(30px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(30px) saturate(180%)',
-                borderTop: '1px solid rgba(255,255,255,0.06)',
-                paddingTop: 6,
-                paddingBottom: `max(env(safe-area-inset-bottom, 0px), 10px)`,
-                position: 'relative', zIndex: 50,
-            }}>
-                {NAV_ITEMS.map((item) => {
-                    const active = location.pathname === item.to;
+            {/* ── Bottom Navigation ── */}
+            <nav
+                className="glass-nav"
+                style={{
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-around',
+                    paddingTop: 8,
+                    paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 12px)',
+                    position: 'relative',
+                    zIndex: 50,
+                }}
+            >
+                {tabs.map(({ to, label, Icon }) => {
+                    const active = location.pathname === to;
+
                     return (
                         <NavLink
-                            key={item.to}
-                            to={item.to}
+                            key={to}
+                            to={to}
                             style={{
-                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-                                padding: '8px 20px', textDecoration: 'none',
+                                display: 'flex', flexDirection: 'column',
+                                alignItems: 'center', gap: 4,
+                                padding: '6px 24px',
+                                textDecoration: 'none',
                                 position: 'relative',
+                                WebkitTapHighlightColor: 'transparent',
                             }}
                         >
-                            {/* Glow behind active */}
+                            {/* Active glow */}
                             {active && (
                                 <motion.div
-                                    layoutId="nav-glow"
+                                    layoutId="nav-active-glow"
                                     style={{
-                                        position: 'absolute', top: 2,
-                                        width: 44, height: 44, borderRadius: '50%',
-                                        background: 'radial-gradient(circle, rgba(34,211,238,0.2) 0%, transparent 70%)',
+                                        position: 'absolute', top: 0,
+                                        width: 48, height: 48, borderRadius: '50%',
+                                        background: 'radial-gradient(circle, rgba(34,211,238,0.18) 0%, transparent 70%)',
                                     }}
-                                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                    transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                                 />
                             )}
-                            <span style={{ fontSize: 20, position: 'relative', zIndex: 2 }}>{item.emoji}</span>
-                            <span className="font-digital" style={{
-                                fontSize: 9, fontWeight: 600, letterSpacing: '0.15em',
-                                color: active ? '#22d3ee' : '#475569',
-                                position: 'relative', zIndex: 2,
-                                display: 'flex', alignItems: 'center', gap: 4,
-                            }}>
-                                {item.label}
-                                {item.to === '/' && isTracking && (
+
+                            {/* Icon */}
+                            <motion.div
+                                animate={{
+                                    scale: active ? 1 : 0.9,
+                                    y: active ? -2 : 0,
+                                }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                style={{ position: 'relative', zIndex: 2 }}
+                            >
+                                <Icon
+                                    size={22}
+                                    strokeWidth={active ? 2.5 : 1.8}
+                                    color={active ? '#22d3ee' : '#475569'}
+                                    style={{
+                                        filter: active ? 'drop-shadow(0 0 8px rgba(34,211,238,0.5))' : 'none',
+                                        transition: 'color 0.2s, filter 0.2s',
+                                    }}
+                                />
+                            </motion.div>
+
+                            {/* Label */}
+                            <span
+                                className="font-digital"
+                                style={{
+                                    fontSize: 9, fontWeight: active ? 700 : 500,
+                                    letterSpacing: '0.15em',
+                                    color: active ? '#22d3ee' : '#475569',
+                                    position: 'relative', zIndex: 2,
+                                    transition: 'color 0.2s',
+                                    display: 'flex', alignItems: 'center', gap: 5,
+                                }}
+                            >
+                                {label}
+                                {to === '/' && isTracking && (
                                     <span style={{
                                         width: 5, height: 5, borderRadius: '50%',
                                         background: '#ef4444',
                                         animation: 'pulse-dot 0.8s infinite',
+                                        boxShadow: '0 0 6px rgba(239,68,68,0.6)',
                                     }} />
                                 )}
                             </span>
-                            {/* Active bar */}
+
+                            {/* Active indicator bar */}
                             {active && (
                                 <motion.div
-                                    layoutId="nav-bar"
+                                    layoutId="nav-active-bar"
                                     style={{
-                                        position: 'absolute', bottom: 0,
-                                        width: 24, height: 2, borderRadius: 2,
+                                        position: 'absolute', bottom: -2,
+                                        width: 20, height: 2, borderRadius: 2,
                                         background: '#22d3ee',
-                                        boxShadow: '0 0 8px rgba(34,211,238,0.5)',
+                                        boxShadow: '0 0 10px rgba(34,211,238,0.6)',
                                     }}
-                                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                    transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                                 />
                             )}
                         </NavLink>

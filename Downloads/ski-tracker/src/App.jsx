@@ -18,6 +18,8 @@ function App() {
     const [maxSpeed, setMaxSpeed] = useState(0);
     const [distance, setDistance] = useState(0);
     const [altitude, setAltitude] = useState(null);
+    const [altitudeMax, setAltitudeMax] = useState(null);
+    const [altitudeMin, setAltitudeMin] = useState(null);
     const [negativeElevation, setNegativeElevation] = useState(0);
     const [coordinates, setCoordinates] = useState([]);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -34,6 +36,8 @@ function App() {
     const timerRef = useRef(null);
     const prevPosRef = useRef(null);
     const maxSpeedRef = useRef(0);
+    const altMaxRef = useRef(null);
+    const altMinRef = useRef(null);
     const flashTimer = useRef(null);
 
     // WakeLock
@@ -62,12 +66,13 @@ function App() {
         if (!navigator.geolocation) return;
         passiveWatchRef.current = navigator.geolocation.watchPosition(
             (p) => {
-                const { latitude, longitude, altitude: alt, speed } = p.coords;
+                const { latitude, longitude, altitude: alt, speed, accuracy } = p.coords;
+                // Only use fixes with reasonable accuracy (< 50m)
+                if (accuracy > 100) return;
                 setUserPosition([latitude, longitude]);
                 setGpsStatus('ok');
-                // Always update altitude
                 if (alt != null) setAltitude(Math.round(alt));
-                // Always update speed (real-time, even without recording)
+                // Real-time speed from device
                 if (speed != null && speed >= 0) {
                     setCurrentSpeed(mpsToKph(speed));
                 } else {
@@ -75,7 +80,7 @@ function App() {
                 }
             },
             () => { setGpsStatus('error'); },
-            { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
+            { enableHighAccuracy: true, maximumAge: 1500, timeout: 10000 }
         );
         setGpsStatus('searching');
         return () => { if (passiveWatchRef.current != null) navigator.geolocation.clearWatch(passiveWatchRef.current); };
@@ -84,10 +89,14 @@ function App() {
     // ── Active recording handler (only when tracking) ──
     const handlePos = useCallback((p) => {
         setGpsStatus('ok');
-        const { latitude: lat, longitude: lon, altitude: alt, speed } = p.coords;
+        const { latitude: lat, longitude: lon, altitude: alt, speed, accuracy } = p.coords;
+        // Skip low-accuracy fixes
+        if (accuracy > 50) return;
         const spd = speed != null && speed >= 0 ? mpsToKph(speed) : 0;
         setCurrentSpeed(spd);
         setUserPosition([lat, lon]);
+
+        // Max speed
         if (spd > maxSpeedRef.current) {
             maxSpeedRef.current = spd;
             setMaxSpeed(spd);
@@ -97,7 +106,22 @@ function App() {
                 flashTimer.current = setTimeout(() => setNewRecord(false), 2500);
             }
         }
-        if (alt != null) setAltitude(Math.round(alt));
+
+        // Altitude + min/max
+        if (alt != null) {
+            const rounded = Math.round(alt);
+            setAltitude(rounded);
+            if (altMaxRef.current === null || rounded > altMaxRef.current) {
+                altMaxRef.current = rounded;
+                setAltitudeMax(rounded);
+            }
+            if (altMinRef.current === null || rounded < altMinRef.current) {
+                altMinRef.current = rounded;
+                setAltitudeMin(rounded);
+            }
+        }
+
+        // Distance + elevation
         if (prevPosRef.current) {
             const pp = prevPosRef.current;
             if (spd > SPEED_THRESHOLD) setDistance(d => d + haversineDistance(pp.lat, pp.lon, lat, lon));
@@ -111,13 +135,15 @@ function App() {
     }, []);
 
     const startTracking = useCallback(async () => {
-        if (!navigator.geolocation) return alert('GPS not supported');
+        if (!navigator.geolocation) return alert('GPS non supporté');
         setMaxSpeed(0); maxSpeedRef.current = 0;
         setDistance(0); setNegativeElevation(0); setCoordinates([]);
         setElapsedSeconds(0); prevPosRef.current = null; setGpsStatus('searching');
+        setAltitudeMax(null); setAltitudeMin(null);
+        altMaxRef.current = null; altMinRef.current = null;
         await acquireWake();
         watchIdRef.current = navigator.geolocation.watchPosition(handlePos, () => setGpsStatus('error'), {
-            enableHighAccuracy: true, maximumAge: 1000, timeout: 10000,
+            enableHighAccuracy: true, maximumAge: 800, timeout: 8000,
         });
         timerRef.current = setInterval(() => setElapsedSeconds(s => s + 1), 1000);
         setIsTracking(true);
@@ -127,21 +153,25 @@ function App() {
         if (watchIdRef.current != null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
         if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
         releaseWake();
-        const s = { id: Date.now(), date: new Date().toISOString(), maxSpeed: maxSpeedRef.current, distance, negativeElevation, duration: elapsedSeconds, coordinates };
+        const s = {
+            id: Date.now(), date: new Date().toISOString(),
+            maxSpeed: maxSpeedRef.current, distance, negativeElevation,
+            duration: elapsedSeconds, coordinates,
+            altitudeMax: altMaxRef.current, altitudeMin: altMinRef.current,
+        };
         const updated = [s, ...sessions].slice(0, 50);
         setSessions(updated);
         localStorage.setItem('ski_sessions', JSON.stringify(updated));
         setIsTracking(false);
     }, [releaseWake, distance, negativeElevation, elapsedSeconds, coordinates, sessions]);
 
-    // Delete a single session by ID
+    // Delete functions
     const deleteSession = useCallback((sessionId) => {
         const updated = sessions.filter(s => s.id !== sessionId);
         setSessions(updated);
         localStorage.setItem('ski_sessions', JSON.stringify(updated));
     }, [sessions]);
 
-    // Delete all sessions for a given day key
     const deleteDaySessions = useCallback((dayKey) => {
         const updated = sessions.filter(s => {
             const d = new Date(s.id);
@@ -161,8 +191,10 @@ function App() {
     if (showSplash) return <SplashScreen onDone={() => setShowSplash(false)} />;
 
     const ctx = {
-        isTracking, currentSpeed, maxSpeed, distance, altitude, negativeElevation,
-        coordinates, elapsedSeconds, gpsStatus, newRecord, sessions, userPosition,
+        isTracking, currentSpeed, maxSpeed, distance, altitude,
+        altitudeMax, altitudeMin,
+        negativeElevation, coordinates, elapsedSeconds, gpsStatus,
+        newRecord, sessions, userPosition,
         onStart: startTracking, onStop: stopTracking,
         deleteSession, deleteDaySessions,
     };

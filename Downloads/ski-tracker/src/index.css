@@ -220,9 +220,7 @@ body {
     display: none !important;
 }
 
-.leaflet-tile-pane {
-    filter: brightness(0.7) contrast(1.1) saturate(0.6);
-}
+/* Tiles are already dark-themed, no filter needed */
 
 /* ── Scrollbar ────────────────────────────────── */
 ::-webkit-scrollbar {

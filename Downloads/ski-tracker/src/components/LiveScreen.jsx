@@ -251,7 +251,7 @@ export default function LiveScreen() {
                             color: '#cffafe', lineHeight: 1,
                             textShadow: '0 0 20px rgba(34,211,238,0.35)',
                         }}>
-                            SKITRACKER
+                            <span style={{ color: '#22d3ee' }}>Ski</span><span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 300 }}>-</span>Track
                         </h1>
                         {isTracking && (
                             <motion.div

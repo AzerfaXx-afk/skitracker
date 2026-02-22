@@ -27,7 +27,7 @@ export default function MapScreen() {
     const { coordinates, userPosition, distance, altitude, maxSpeed, negativeElevation } = useTracking();
 
     return (
-        <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+        <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#000' }}>
             {/* Full-screen interactive map */}
             <div style={{ position: 'absolute', inset: 0 }}>
                 <Suspense fallback={

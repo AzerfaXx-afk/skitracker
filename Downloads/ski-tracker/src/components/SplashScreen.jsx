@@ -126,7 +126,7 @@ export default function SplashScreen({ onDone }) {
                     marginTop: 14, textTransform: 'uppercase',
                 }}
             >
-                Track · Analyze · Perform
+                Suivre · Analyser · Performer
             </motion.p>
 
             {/* Decorative line */}
@@ -166,7 +166,7 @@ export default function SplashScreen({ onDone }) {
                         }}
                         whileTap={{ scale: 0.94 }}
                     >
-                        GET STARTED
+                        C'EST PARTI
                         <ChevronRight size={16} />
                     </motion.button>
                 )}

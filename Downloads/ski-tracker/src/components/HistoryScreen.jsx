@@ -107,7 +107,7 @@ function DayAccordion({ dayLabel, sessions, defaultOpen, onDeleteDay, onDeleteSe
                         {dayLabel}
                     </p>
                     <p className="font-digital" style={{ fontSize: 8, color: '#475569', marginTop: 2, letterSpacing: '0.1em' }}>
-                        {sessions.length} run{sessions.length > 1 ? 's' : ''} · {dayTotalDist.toFixed(1)} km · D- {Math.round(dayTotalDescent)}m
+                        {sessions.length} descente{sessions.length > 1 ? 's' : ''} · {dayTotalDist.toFixed(1)} km · D- {Math.round(dayTotalDescent)}m
                     </p>
                 </div>
 
@@ -198,7 +198,7 @@ function SessionRow({ session, index, onDelete }) {
             {/* Stats */}
             <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
                 <div>
-                    <span className="font-digital" style={{ fontSize: 6, color: '#475569', letterSpacing: '0.1em' }}>MAX</span>
+                    <span className="font-digital" style={{ fontSize: 6, color: '#475569', letterSpacing: '0.1em' }}>VIT. MAX</span>
                     <p className="font-digital" style={{ fontSize: 12, fontWeight: 800, color: '#22d3ee', marginTop: 1 }}>
                         {session.maxSpeed.toFixed(0)}<span style={{ fontSize: 6, color: '#475569', marginLeft: 2 }}>km/h</span>
                     </p>
@@ -286,12 +286,12 @@ export default function HistoryScreen() {
             <div style={{ padding: 'max(env(safe-area-inset-top, 14px), 14px) 20px 10px', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <Trophy size={18} color="#22d3ee" />
-                    <h2 className="font-digital" style={{ fontSize: 16, fontWeight: 800, letterSpacing: '0.2em', color: '#22d3ee' }}>MY RUNS</h2>
+                    <h2 className="font-digital" style={{ fontSize: 16, fontWeight: 800, letterSpacing: '0.2em', color: '#22d3ee' }}>MES DESCENTES</h2>
                 </div>
                 <p className="font-digital" style={{ fontSize: 10, color: '#475569', letterSpacing: '0.1em', marginTop: 4 }}>
                     {sessions.length > 0
-                        ? `${sessions.length} session${sessions.length > 1 ? 's' : ''} · ${dayGroups.length} day${dayGroups.length > 1 ? 's' : ''}`
-                        : 'No sessions yet'}
+                        ? `${sessions.length} session${sessions.length > 1 ? 's' : ''} · ${dayGroups.length} jour${dayGroups.length > 1 ? 's' : ''}`
+                        : 'Aucune session'}
                 </p>
             </div>
 
@@ -300,12 +300,12 @@ export default function HistoryScreen() {
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                     className="glass-card" style={{ margin: '4px 16px 14px', padding: 16, flexShrink: 0 }}>
                     <p className="font-digital" style={{ fontSize: 8, color: '#475569', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: 14 }}>
-                        ⭐ All-time Bests
+                        ⭐ Records Absolus
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-                        <BestStat icon={Gauge} label="Top Speed" value={Math.max(...sessions.map(s => s.maxSpeed)).toFixed(0)} unit="km/h" color="#22d3ee" />
+                        <BestStat icon={Gauge} label="Vitesse Max" value={Math.max(...sessions.map(s => s.maxSpeed)).toFixed(0)} unit="km/h" color="#22d3ee" />
                         <BestStat icon={MapPin} label="Distance" value={Math.max(...sessions.map(s => s.distance)).toFixed(1)} unit="km" color="#f97316" />
-                        <BestStat icon={TrendingDown} label="Descent" value={Math.max(...sessions.map(s => s.negativeElevation)).toFixed(0)} unit="m" color="#a78bfa" />
+                        <BestStat icon={TrendingDown} label="Dénivelé" value={Math.max(...sessions.map(s => s.negativeElevation)).toFixed(0)} unit="m" color="#a78bfa" />
                     </div>
                 </motion.div>
             )}
@@ -318,8 +318,8 @@ export default function HistoryScreen() {
                         <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
                             <span style={{ fontSize: 52, display: 'block', marginBottom: 16 }}>⛷️</span>
                         </motion.div>
-                        <p style={{ color: '#94a3b8', fontWeight: 600, fontSize: 15 }}>No runs yet</p>
-                        <p style={{ color: '#475569', fontSize: 12, marginTop: 6, lineHeight: 1.5 }}>Go to the Live tab and hit START REC!</p>
+                        <p style={{ color: '#94a3b8', fontWeight: 600, fontSize: 15 }}>Aucune descente</p>
+                        <p style={{ color: '#475569', fontSize: 12, marginTop: 6, lineHeight: 1.5 }}>Lance un enregistrement depuis l'onglet Direct !</p>
                     </motion.div>
                 ) : (
                     dayGroups.map(([day, daySessions], i) => (

@@ -4,9 +4,9 @@ import { Zap, Map, Trophy } from 'lucide-react';
 import { useTracking } from '../App';
 
 const tabs = [
-    { to: '/', label: 'Live', Icon: Zap },
-    { to: '/map', label: 'Map', Icon: Map },
-    { to: '/history', label: 'History', Icon: Trophy },
+    { to: '/', label: 'Direct', Icon: Zap },
+    { to: '/map', label: 'Carte', Icon: Map },
+    { to: '/history', label: 'Historique', Icon: Trophy },
 ];
 
 export default function Layout() {

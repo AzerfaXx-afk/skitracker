@@ -81,7 +81,7 @@ function CTAButton({ isTracking, elapsedSeconds, onStart, onStop }) {
                         {formatDuration(elapsedSeconds)}
                     </span>
                     <span className="font-digital" style={{ fontSize: 7, fontWeight: 700, color: 'rgba(255,255,255,0.65)', letterSpacing: '0.12em', marginTop: 1, position: 'relative', zIndex: 2 }}>
-                        STOP & SAVE
+                        ARRÊTER
                     </span>
                 </motion.button>
             </div>
@@ -119,7 +119,7 @@ function CTAButton({ isTracking, elapsedSeconds, onStart, onStop }) {
                 }} />
                 <Play size={30} fill="white" color="white" style={{ position: 'relative', zIndex: 2, marginBottom: 3, marginLeft: 3 }} />
                 <span className="font-digital" style={{ fontSize: 9, fontWeight: 800, color: '#fff', letterSpacing: '0.12em', position: 'relative', zIndex: 2 }}>
-                    START REC
+                    ENREGISTRER
                 </span>
             </motion.button>
         </div>
@@ -212,9 +212,8 @@ export default function LiveScreen() {
                 minHeight: 0,
             }}>
                 {/* Speed — always live */}
-                <StatCard icon={Gauge} label="Speed" value={currentSpeed.toFixed(1)} unit="km/h" color={speedColor} large />
+                <StatCard icon={Gauge} label="Vitesse" value={currentSpeed.toFixed(1)} unit="km/h" color={speedColor} large />
 
-                {/* Altitude — always live */}
                 <StatCard icon={Mountain} label="Altitude" value={altitude != null ? `${altitude}` : '--'} unit="m" color="#e2e8f0" />
 
                 {/* Row: Max + Distance (only when recording) */}
@@ -228,12 +227,12 @@ export default function LiveScreen() {
                             style={{ overflow: 'hidden' }}
                         >
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
-                                <StatCard icon={Gauge} label="Max Speed" value={maxSpeed.toFixed(1)} unit="km/h" color="#22d3ee" />
+                                <StatCard icon={Gauge} label="Vitesse Max" value={maxSpeed.toFixed(1)} unit="km/h" color="#22d3ee" />
                                 <StatCard icon={MapPin} label="Distance" value={distance.toFixed(2)} unit="km" color="#f97316" />
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                                <StatCard icon={TrendingDown} label="D- Descent" value={`${Math.round(negativeElevation)}`} unit="m" color="#a78bfa" />
-                                <StatCard icon={Timer} label="Duration" value={formatDuration(elapsedSeconds)} color="#94a3b8" />
+                                <StatCard icon={TrendingDown} label="D- Dénivelé" value={`${Math.round(negativeElevation)}`} unit="m" color="#a78bfa" />
+                                <StatCard icon={Timer} label="Durée" value={formatDuration(elapsedSeconds)} color="#94a3b8" />
                             </div>
                         </motion.div>
                     )}

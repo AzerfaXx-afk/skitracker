@@ -57,23 +57,31 @@ function App() {
         return () => document.removeEventListener('visibilitychange', h);
     }, [isTracking, acquireWake]);
 
-    // Passive GPS
+    // ── Passive GPS — always on, feeds real-time speed + altitude + position ──
     useEffect(() => {
         if (!navigator.geolocation) return;
         passiveWatchRef.current = navigator.geolocation.watchPosition(
             (p) => {
-                setUserPosition([p.coords.latitude, p.coords.longitude]);
-                if (p.coords.altitude != null && !isTracking) setAltitude(Math.round(p.coords.altitude));
-                if (!isTracking) setGpsStatus('ok');
+                const { latitude, longitude, altitude: alt, speed } = p.coords;
+                setUserPosition([latitude, longitude]);
+                setGpsStatus('ok');
+                // Always update altitude
+                if (alt != null) setAltitude(Math.round(alt));
+                // Always update speed (real-time, even without recording)
+                if (speed != null && speed >= 0) {
+                    setCurrentSpeed(mpsToKph(speed));
+                } else {
+                    setCurrentSpeed(0);
+                }
             },
-            () => { if (!isTracking) setGpsStatus('error'); },
-            { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+            () => { setGpsStatus('error'); },
+            { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
         );
         setGpsStatus('searching');
         return () => { if (passiveWatchRef.current != null) navigator.geolocation.clearWatch(passiveWatchRef.current); };
-    }, [isTracking]);
+    }, []);
 
-    // Active tracking handler
+    // ── Active recording handler (only when tracking) ──
     const handlePos = useCallback((p) => {
         setGpsStatus('ok');
         const { latitude: lat, longitude: lon, altitude: alt, speed } = p.coords;
@@ -104,7 +112,7 @@ function App() {
 
     const startTracking = useCallback(async () => {
         if (!navigator.geolocation) return alert('GPS not supported');
-        setCurrentSpeed(0); setMaxSpeed(0); maxSpeedRef.current = 0;
+        setMaxSpeed(0); maxSpeedRef.current = 0;
         setDistance(0); setNegativeElevation(0); setCoordinates([]);
         setElapsedSeconds(0); prevPosRef.current = null; setGpsStatus('searching');
         await acquireWake();
@@ -120,10 +128,10 @@ function App() {
         if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
         releaseWake();
         const s = { id: Date.now(), date: new Date().toISOString(), maxSpeed: maxSpeedRef.current, distance, negativeElevation, duration: elapsedSeconds, coordinates };
-        const updated = [s, ...sessions].slice(0, 30);
+        const updated = [s, ...sessions].slice(0, 50);
         setSessions(updated);
         localStorage.setItem('ski_sessions', JSON.stringify(updated));
-        setIsTracking(false); setCurrentSpeed(0);
+        setIsTracking(false);
     }, [releaseWake, distance, negativeElevation, elapsedSeconds, coordinates, sessions]);
 
     useEffect(() => () => {

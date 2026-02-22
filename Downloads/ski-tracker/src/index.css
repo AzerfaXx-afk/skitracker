@@ -1,11 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+:root {
+    --bg-primary: #020617;
+    --bg-glass: rgba(2, 6, 23, 0.72);
+    --bg-glass-light: rgba(255, 255, 255, 0.04);
+    --cyan: #22d3ee;
+    --cyan-dim: rgba(34, 211, 238, 0.15);
+    --orange: #f97316;
+    --purple: #a78bfa;
+    --red: #ef4444;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #475569;
+    --border-subtle: rgba(255, 255, 255, 0.06);
+}
+
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 html,
@@ -16,75 +32,50 @@ body,
     overflow: hidden;
     margin: 0;
     padding: 0;
+    background: var(--bg-primary);
 }
 
 body {
     font-family: 'Inter', -apple-system, system-ui, sans-serif;
-    background: #020617;
-    color: #f1f5f9;
+    color: var(--text-primary);
     overscroll-behavior: none;
     user-select: none;
+    position: fixed;
+    inset: 0;
 }
 
-/* ── Digital font ────────────────────────────────────────── */
+#root {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Fonts */
 .font-digital {
     font-family: 'Orbitron', monospace;
 }
 
-/* ── Glass panels ────────────────────────────────────────── */
+/* Glass panels */
 .glass {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 20px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
 }
 
-.glass-strong {
-    background: rgba(2, 6, 23, 0.65);
-    backdrop-filter: blur(30px) saturate(200%);
-    -webkit-backdrop-filter: blur(30px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
-}
-
-.glass-nav {
-    background: rgba(2, 6, 23, 0.78);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-/* ── Neon glow effects ───────────────────────────────────── */
-.glow-cyan {
-    text-shadow: 0 0 10px rgba(34, 211, 238, 0.6), 0 0 30px rgba(34, 211, 238, 0.3), 0 0 60px rgba(34, 211, 238, 0.15);
-}
-
-.glow-orange {
-    text-shadow: 0 0 10px rgba(249, 115, 22, 0.7), 0 0 30px rgba(249, 115, 22, 0.35);
-}
-
-.glow-red {
-    text-shadow: 0 0 10px rgba(248, 113, 113, 0.7), 0 0 30px rgba(248, 113, 113, 0.35);
-}
-
-/* Box glows */
-.box-glow-cyan {
-    box-shadow: 0 0 25px rgba(34, 211, 238, 0.25), 0 0 60px rgba(34, 211, 238, 0.1);
-}
-
-/* ── Leaflet dark ────────────────────────────────────────── */
+/* Leaflet */
 .leaflet-container {
     background: #060d1f !important;
 }
 
-/* Remove the tile hue filter — we use CartoDB dark tiles natively */
 .leaflet-control-zoom,
 .leaflet-control-attribution {
     display: none !important;
 }
 
-/* ── Custom scrollbar ────────────────────────────────────── */
+/* Scrollbar */
 ::-webkit-scrollbar {
     width: 3px;
 }
@@ -98,48 +89,43 @@ body {
     border-radius: 2px;
 }
 
-/* ── Breathing animation ─────────────────────────────────── */
+/* Breathing */
 @keyframes breathe {
 
     0%,
     100% {
         transform: scale(1);
-        opacity: 0.5;
+        opacity: 0.35;
     }
 
     50% {
-        transform: scale(1.12);
-        opacity: 0.9;
+        transform: scale(1.15);
+        opacity: 0.7;
     }
 }
 
-.breathe {
-    animation: breathe 3s ease-in-out infinite;
-}
-
-@keyframes breathe-slow {
+@keyframes breathe-outer {
 
     0%,
     100% {
         transform: scale(1);
-        opacity: 0.25;
+        opacity: 0.15;
     }
 
     50% {
-        transform: scale(1.35);
-        opacity: 0.6;
+        transform: scale(1.3);
+        opacity: 0.4;
     }
 }
 
-.breathe-slow {
-    animation: breathe-slow 4s ease-in-out infinite;
-}
+@keyframes pulse-dot {
 
-/* ── Safe areas ──────────────────────────────────────────── */
-.safe-top {
-    padding-top: env(safe-area-inset-top, 12px);
-}
+    0%,
+    100% {
+        opacity: 1;
+    }
 
-.safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    50% {
+        opacity: 0.3;
+    }
 }

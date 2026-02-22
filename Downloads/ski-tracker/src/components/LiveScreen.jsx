@@ -206,7 +206,9 @@ export default function LiveScreen() {
             {/* ── Real-time metrics ── */}
             <div style={{
                 flex: 1, display: 'flex', flexDirection: 'column',
-                padding: '8px 14px 0', gap: 8, overflow: 'hidden',
+                padding: '8px 14px 0', gap: 8,
+                overflowY: 'auto', overflowX: 'hidden',
+                WebkitOverflowScrolling: 'touch',
                 minHeight: 0,
             }}>
                 {/* Speed — always live */}
@@ -241,8 +243,9 @@ export default function LiveScreen() {
             {/* ── CTA Button — pinned at bottom ── */}
             <div style={{
                 flexShrink: 0,
-                paddingBottom: 18, paddingTop: 10,
-                display: 'flex', justifyContent: 'center',
+                paddingBottom: 28, paddingTop: 20,
+                display: 'flex', justifyContent: 'center', alignItems: 'center',
+                minHeight: 160,
             }}>
                 <CTAButton isTracking={isTracking} elapsedSeconds={elapsedSeconds} onStart={onStart} onStop={onStop} />
             </div>

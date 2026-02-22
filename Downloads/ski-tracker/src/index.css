@@ -220,7 +220,11 @@ body {
     display: none !important;
 }
 
-/* Tiles are already dark-themed, no filter needed */
+/* ── Leaflet map ──────────────────────────────── */
+.leaflet-container {
+    background: #000 !important;
+}
+
 
 /* ── Scrollbar ────────────────────────────────── */
 ::-webkit-scrollbar {
